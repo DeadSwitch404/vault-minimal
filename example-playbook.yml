@@ -1,0 +1,12 @@
+---
+- name: Apply DeadSwitch Vault Minimal Hardening
+  hosts: all
+  become: true
+
+  roles:
+    - vault-unsafe-packages
+    - vault-password-policy
+    - vault-services-minimal
+    - vault-fs-harden
+    - vault-ssh-harden
+    - vault-sysctl-harden
