@@ -1,0 +1,146 @@
+---
+- name: Change SSH port to a non-standard one
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?Port '
+    line: 'Port {{ ssh_hardening_port | default(22) }}'
+    state: present
+  when: ssh_hardening_port
+  notify: restart_sshd
+
+- name: Disable the root login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin\b'
+    line: 'PermitRootLogin no'
+    state: present
+  notify: restart_sshd
+
+- name: Configure the AllowUsers
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?AllowUsers\b'
+    line: "AllowUsers {{ ssh_hardening_permitted_users | join(' ') }}"
+    state: present
+  when: ssh_hardening_permitted_users
+  notify: restart_sshd
+
+- name: Disable insecure ciphers
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?Ciphers'
+    line: 'Ciphers aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr'
+    state: present
+  notify: restart_sshd
+
+- name: Set PermitTTY
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitTTY'
+    line: 'PermitTTY yes'
+    state: present
+  notify: restart_sshd
+
+- name: Set PermitUserEnvironment
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitUserEnvironment'
+    line: 'PermitUserEnvironment no'
+    state: present
+  notify: restart_sshd
+
+- name: Set StrictModes
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?StrictModes'
+    line: 'StrictModes yes'
+    state: present
+  notify: restart_sshd
+
+- name: Enforce SSH protocol 2
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?Protocol\b'
+    line: 'Protocol 2'
+    state: present
+  notify: restart_sshd
+
+- name: Set login banner /etc/issue.net
+  ansible.builtin.template:
+    src: issue.j2
+    dest: /etc/issue.net
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart_sshd
+
+- name: Set login banner /etc/issue
+  ansible.builtin.template:
+    src: issue.j2
+    dest: /etc/issue
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart_sshd
+
+- name: Ensure SSH login banner is set
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?Banner\b'
+    line: 'Banner /etc/issue.net'
+    state: present
+  notify: restart_sshd
+
+- name: "Ensure login banner is enabled via PAM"
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/login
+    regexp: '^session\s+optional\s+pam_issue\.so'
+    line: 'session optional pam_issue.so issue'
+    state: present
+  notify: restart_sshd
+
+- name: Limit MaxAuthTries
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?MaxAuthTries\b'
+    line: 'MaxAuthTries 3'
+    state: present
+  notify: restart_sshd
+
+- name: Set LoginGraceTime
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?LoginGraceTime\b'
+    line: 'LoginGraceTime 20'
+    state: present
+  notify: restart_sshd
+
+- name: Disable TCP forwarding
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?AllowTcpForwarding\b'
+    line: 'AllowTcpForwarding no'
+    state: present
+  notify: restart_sshd
+
+- name: Disable X11 forwarding
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?X11Forwarding\b'
+    line: 'X11Forwarding no'
+    state: present
+  notify: restart_sshd
+
+- name: Ensure correct permissions on sshd_config
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0600'
+  notify: restart_sshd
+
+- name: Check if sshd is active
+  ansible.builtin.command: systemctl is-active sshd
+  register: sshd_status
+  changed_when: false
+  failed_when: sshd_status.stdout != "active"

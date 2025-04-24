@@ -1,0 +1,7 @@
+- name: "Apply hardened sysctl settings"
+  ansible.builtin.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop: "{{ vault_minimal_sysctl_settings | dict2items }}"

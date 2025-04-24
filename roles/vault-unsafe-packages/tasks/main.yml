@@ -1,0 +1,7 @@
+---
+- name: "Remove unsafe packages"
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ vault_minimal_unsafe_packages }}"
+  when: vault_minimal_remove_unsafe | default(true)

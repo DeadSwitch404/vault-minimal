@@ -1,0 +1,17 @@
+---
+- name: "Ensure unwanted services are masked (if present)"
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    masked: true
+  loop: "{{ vault_minimal_unwanted_services }}"
+  when: vault_minimal_mask_services | default(true)
+  ignore_errors: true
+  register: vault_service_mask_results
+
+- name: "Log which services were not found (optional)"
+  debug:
+    msg: "Service not found or could not be managed: {{ item.item }}"
+  loop: "{{ vault_service_mask_results.results | selectattr('failed', 'defined') | selectattr('failed') | list }}"
+  when: vault_service_mask_results is defined

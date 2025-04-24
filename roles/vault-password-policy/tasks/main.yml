@@ -1,0 +1,40 @@
+---
+- name: "Install PAM password quality module"
+  ansible.builtin.package:
+    name: "{{ vault_password_policy_pam_package }}"
+    state: present
+  vars:
+    vault_password_policy_pam_package: >-
+      {{ 'libpam-pwquality' if ansible_facts['os_family'] == 'Debian'
+         else 'libpwquality' }}
+
+- name: "Ensure password complexity requirements are configured (Debian/RHEL)"
+  ansible.builtin.copy:
+    dest: /etc/security/pwquality.conf
+    content: |
+      minlen = {{ vault_pw_minlen }}
+      dcredit = {{ vault_pw_dcredit }}
+      ucredit = {{ vault_pw_ucredit }}
+      lcredit = {{ vault_pw_lcredit }}
+      ocredit = {{ vault_pw_ocredit }}
+    owner: root
+    group: root
+    mode: '0640'
+
+- name: "Ensure PAM enforces pwquality policies on Debian"
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/common-password
+    regexp: '^password\s+requisite\s+pam_pwquality\.so'
+    line: 'password requisite pam_pwquality.so retry={{ vault_pw_retry }}'
+    backup: true
+    create: false
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: "Ensure PAM enforces pwquality policies on RHEL/Rocky"
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/system-auth
+    regexp: '^password\s+requisite\s+pam_pwquality\.so'
+    line: 'password requisite pam_pwquality.so retry={{ vault_pw_retry }}'
+    backup: true
+    create: false
+  when: ansible_facts['os_family'] == "RedHat"

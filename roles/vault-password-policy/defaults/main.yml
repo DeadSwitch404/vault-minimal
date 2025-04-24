@@ -1,0 +1,7 @@
+---
+vault_pw_minlen: 12        # Minimum password length
+vault_pw_dcredit: -1       # At least one digit
+vault_pw_ucredit: -1       # At least one uppercase
+vault_pw_lcredit: -1       # At least one lowercase
+vault_pw_ocredit: -1       # At least one special character
+vault_pw_retry: 3          # Retry attempts for password prompts

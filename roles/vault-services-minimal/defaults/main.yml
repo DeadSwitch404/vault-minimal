@@ -1,0 +1,14 @@
+---
+vault_minimal_mask_services: true
+
+vault_minimal_unwanted_services:
+  - avahi-daemon      # Zeroconf/Bonjour service, not needed on hardened systems
+  - cups              # Printing service, unnecessary on most servers
+  - bluetooth         # Bluetooth is a wireless attack vector
+  - rpcbind           # Used by NFS and other RPC services; often exploited
+  - nfs-server        # Network File System; vulnerable and not minimal
+  - smbd              # Samba file sharing service, rarely needed
+  - rsyncd            # Daemon for file syncing, usually not needed persistently
+  - telnet.socket     # Insecure remote access protocol
+  - ftp               # Unencrypted file transfer protocol
+  - xinetd            # Legacy internet super-server, obsolete

@@ -1,0 +1,27 @@
+---
+- name: "Harden /tmp with noexec, nosuid, nodev"
+  ansible.builtin.mount:
+    path: /tmp
+    src: tmpfs
+    fstype: tmpfs
+    opts: "defaults,noexec,nosuid,nodev"
+    state: mounted
+  when: ansible_mounts | selectattr('mount', 'equalto', '/tmp') | list | length == 0
+
+- name: "Harden /dev/shm with noexec, nosuid, nodev"
+  ansible.builtin.mount:
+    path: /dev/shm
+    src: tmpfs
+    fstype: tmpfs
+    opts: "defaults,noexec,nosuid,nodev"
+    state: mounted
+  when: ansible_mounts | selectattr('mount', 'equalto', '/dev/shm') | list | length == 0
+
+- name: "Ensure /home is mounted with nodev"
+  ansible.builtin.mount:
+    path: /home
+    opts: "defaults,nodev"
+    state: mounted
+    fstype: "{{ ansible_mounts | selectattr('mount', 'equalto', '/home') | map(attribute='fstype') | list | first | default('ext4') }}"
+    src: "{{ ansible_mounts | selectattr('mount', 'equalto', '/home') | map(attribute='device') | list | first | default('/dev/sda1') }}"
+  when: ansible_mounts | selectattr('mount', 'equalto', '/home') | list | length > 0

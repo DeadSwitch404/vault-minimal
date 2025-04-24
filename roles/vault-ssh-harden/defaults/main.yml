@@ -1,0 +1,4 @@
+---
+ssh_hardening_port: 22
+ssh_hardening_permitted_users: []
+ssh_hardening_allowed_ssh_commands: []

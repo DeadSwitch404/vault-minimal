@@ -1,0 +1,14 @@
+---
+vault_minimal_unsafe_packages:
+  - telnet
+  - rsh
+  - rlogin
+  - ypbind
+  - tftp
+  - talk
+  - xinetd
+  - vsftpd
+  - ftp
+  - samba
+  - nfs-utils
+  - netcat
