@@ -36,6 +36,12 @@ These are the public-facing versions of the hardened Vault Pack.
     - vault-sysctl-harden
 ```
 
+Run the playbook with:
+
+```bash
+ansible-playbook -i inventory.ini example-playbook.yml
+```
+
 ## 🧙‍♂️ Author
 
 DeadSwitch | The Cyber Ghost  
@@ -43,4 +49,4 @@ DeadSwitch | The Cyber Ghost
 
 ## 🔗 License
 
-MIT — Use freely, attribute wisely.
+MIT - Use freely, attribute wisely.
